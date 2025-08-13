@@ -37,12 +37,12 @@ namespace TestHID
 
         // số ReadReport đang pending để luôn giữ pipeline đầy
         private int _inflightReads;
-        private const int TargetInflightReads = 8;  // có thể tăng 6–8 nếu vẫn rơi
+        private const int TargetInflightReads = 32;  // có thể tăng 6–8 nếu vẫn rơi
 
         // gọi _rxEvent.Set() mỗi batch gói để giảm context switch
         private const int WakeBatch = 16;
         // tăng HID kernel input buffers
-        private const uint KernelInputBuffers = 128;
+        private const uint KernelInputBuffers = 256;
 
         public HidLogService(int vid, int pid)
         {
@@ -75,6 +75,9 @@ namespace TestHID
 
             if (!_device.IsOpen) _device.OpenDevice();
             if (!_device.IsOpen) return false;
+
+            _device.MonitorDeviceEvents = false;
+            
 
             // Tăng kernel HID input buffers (cần handle ReadWrite)
             try { BoostHidBuffers(_device.DevicePath, KernelInputBuffers); } catch { /*ignore*/ }
